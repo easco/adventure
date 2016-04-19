@@ -1,9 +1,9 @@
-defmodule Adventure.Game.CommandProcessor do
+defmodule Adventure.CommandProcessor do
   import Supervisor.Spec
 
-  def start_link() do
+  def start_link(game) do
     children =  [
-      worker(Adventure.Game.HandleCommand, [], restart: :transient)
+      worker(Adventure.Game.HandleCommand, [game], restart: :transient)
     ]
 
     Supervisor.start_link(children, strategy: :simple_one_for_one, name: __MODULE__)

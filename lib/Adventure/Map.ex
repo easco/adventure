@@ -1,65 +1,39 @@
 defmodule Adventure.Map do
-  alias Adventure.Room
-  alias Adventure.Object
+  import Supervisor.Spec
+  alias  Adventure.Entity.Room
 
-  defstruct rooms: [], object_locations: %{}
+  @rooms_array [
+    %{       id: :living_room,
+          title: "Living Room",
+    description: "You are in the living-room of a wizards house. There is a wizard snoring loudly on the couch.",
+          exits: [ {:west, "door", :garden },
+                   {:up, "stairway", :attic} ]},
 
-  def start_link do
-      Agent.start_link(fn -> Adventure.Map.new() end, name: __MODULE__ )
-  end
+    %{       id: :garden,
+          title: "Garden",
+    description: "You are in a beautiful garden. There is a well in front of you.",
+          exits: [{:east, "door", :living_room }]},
 
-  def known_objects() do
-    Agent.get(__MODULE__, fn map -> Object.known_objects(map) end)
-  end
-
-  def new do
-    rooms_array =  [
-      Room.new( :living_room,
-            title: "Living Room",
-      description: "You are in the living-room of a wizards house. There is a wizard snoring loudly on the couch.",
-            exits: [ {:west, "door", :garden },
-                     {:up, "stairway", :attic} ]),
-
-      Room.new( :garden,
-            title: "Garden",
-      description: "You are in a beautiful garden. There is a well in front of you.",
-            exits: [{:east, "door", :living_room }]),
-
-      Room.new( :attic,
-            title: "Attic",
-      description: "You are in the attic of the wizards house. There is a giant welding torch in the corner.",
-            exits: [{:down, "stairway", :living_room }])
+    %{       id: :attic,
+          title: "Attic",
+    description: "You are in the attic of the wizards house. There is a giant welding torch in the corner.",
+          exits: [{:down, "stairway", :living_room }]}
   ]
 
-  %Adventure.Map{
-    rooms: (for room <- rooms_array, do: {room.id, room}),
+  def start_link() do
+    children = Enum.map(@rooms_array, fn(room_map) ->
+      worker(Room, [room_map.id, room_map.title, room_map.description], id: room_map.id)
+    end)
 
-    object_locations: %{
-      whiskey_bottle: :living_room,
-      bucket: :living_room,
-      chain: :garden,
-      frog: :garden
-    },
-  }
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 
-  def room(map, room_id) do
-    map.rooms[room_id]
-  end
+  def room(map, room_id), do: child_by_id(map, room_id)
 
-  def objects_in_room(map, room) do
-    map.object_locations
-      |> Enum.filter(fn ({_, location}) -> location == room.id end)
-      |> Enum.map(fn ({item_id, _location}) -> item_id end)
-  end
-
-  def room_description(map, room) do
-    main_description = Room.titled_description(room)
-
-    objects_description = Adventure.Map.objects_in_room(map, room)
-                            |> Enum.map(&Adventure.Object.description/1)
-                            |> Enum.join("\n")
-
-    main_description <> "\n" <> objects_description
+  defp child_by_id(supervisor, which_child_id) do
+    case Enum.find(Supervisor.which_children(supervisor), fn({child_id, _, _, _}) -> child_id == which_child_id end ) do
+      {_, child_pid, _, _} -> child_pid
+      _ -> nil
+    end
   end
 end

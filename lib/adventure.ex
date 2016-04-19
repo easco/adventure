@@ -1,19 +1,21 @@
 defmodule Adventure do
 
-  alias Adventure.Parser
+  alias Adventure.Game
+  alias Adventure.CommandProcessor
 
   #
   # Escript main routine
   #
   def main(_args) do
-    {:ok, game} = Adventure.Game.start_link()
+    {:ok, game} = Game.start_link()
+    {:ok, command_processor} = CommandProcessor.start_link(game)
 
     IO.puts("Welcome to Adventure! #{inspect game}\n")
 
-    command_loop(game)
+    command_loop(command_processor)
   end
 
-  defp command_loop(game) do
+  defp command_loop(command_processor) do
     user_input = IO.gets(:stdio, prompt())
 
     case user_input do
@@ -28,11 +30,8 @@ defmodule Adventure do
         {:ok, :eof}
 
       _ ->
-        tokens = Parser.tokenize_line(user_input)
-        result = Parser.parse(tokens, %{})
-        IO.puts("Result #{inspect result}")
-
-        command_loop(game)
+        CommandProcessor.process_command(user_input)
+        command_loop(command_processor)
     end
   end
 

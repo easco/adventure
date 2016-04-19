@@ -1,14 +1,13 @@
 defmodule Adventure.Parser do
-
-  alias Adventure.Object
-
   @verbs [
     { "get", :take },
     { "take", :take },
     { "drop", :drop },
     { "release", :drop },
     { "kill", :destroy },
-    { "go", :go }
+    { "go", :go },
+    { "look", :look },
+    { "examine", :look },
   ]
 
   @articles [
@@ -37,7 +36,7 @@ defmodule Adventure.Parser do
   end
 
   # pull in all the known objects and set up classify_word to identify them as nouns
-  for %Object{object_id: object_id, name: name} <- Adventure.Object.all_objects() do
+  for %{id: object_id, name: name} <- Adventure.Entity.Object.all_objects() do
     def classify_word(unquote name) do
       {:noun, unquote object_id }
     end

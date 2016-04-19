@@ -2,12 +2,13 @@ defmodule Adventure.Game do
   import Supervisor.Spec
 
   alias Adventure.Entity.Player
-  alias Adventure.Game.CommandProcessor
+  alias Adventure.CommandProcessor
+  alias Adventure.Map
 
   def start_link() do
     children = [
       worker(Player, [], id: Player),
-      supervisor(CommandProcessor, [], id: CommandProcessor)
+      supervisor(Map, [], id: Map),
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: __MODULE__)
@@ -17,8 +18,8 @@ defmodule Adventure.Game do
     child_by_id(game, Player)
   end
 
-  def command_processor(game) do
-    child_by_id(game, CommandProcessor)
+  def map(game) do
+    child_by_id(game, Map)
   end
 
   defp child_by_id(game, which_child_id) do
