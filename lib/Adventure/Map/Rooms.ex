@@ -1,6 +1,6 @@
-defmodule Adventure.Map do
+defmodule Adventure.Rooms do
   import Supervisor.Spec
-  alias  Adventure.Entity.Room
+  alias Adventure.Entity.Room
 
   @rooms_array [
     %{       id: :living_room,
@@ -26,14 +26,5 @@ defmodule Adventure.Map do
     end)
 
     Supervisor.start_link(children, strategy: :one_for_one)
-  end
-
-  def room(map, room_id), do: child_by_id(map, room_id)
-
-  defp child_by_id(supervisor, which_child_id) do
-    case Enum.find(Supervisor.which_children(supervisor), fn({child_id, _, _, _}) -> child_id == which_child_id end ) do
-      {_, child_pid, _, _} -> child_pid
-      _ -> nil
-    end
   end
 end

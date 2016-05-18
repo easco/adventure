@@ -1,8 +1,8 @@
 defmodule Adventure.Entity do
 
-	def start_link(id, components) when is_atom(id) do
+	def start_link(id, components, opts \\ []) when is_atom(id) do
 		# Start the entity's server
-		{:ok, new_entity} =  GenServer.start_link(__MODULE__, id)
+		{:ok, new_entity} =  GenServer.start_link(__MODULE__, id, opts)
 
 		# Add all the components
 		Enum.each(components, fn(component) -> put_component(new_entity, component) end)
@@ -51,11 +51,11 @@ defmodule Adventure.Entity do
 		end
 	end
 
-	def handle_cast({:put_component, {component_id, component_data}}, state = {entity_id, components}) do
+	def handle_cast({:put_component, {component_id, component_data}}, {entity_id, components}) do
 		{:noreply, {entity_id, Map.put(components, component_id, component_data)}}
 	end
 
-	def handle_cast(msg, state) do
+	def handle_cast(_, state) do
 		{:noreply, state}
 	end
 

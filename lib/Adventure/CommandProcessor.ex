@@ -1,16 +1,29 @@
 defmodule Adventure.CommandProcessor do
-  import Supervisor.Spec
+  alias Adventure.Parser
+  alias Adventure.Map
+  alias Adventure.Entity.Room
 
-  def start_link(game) do
-    children =  [
-      worker(Adventure.Game.HandleCommand, [game], restart: :transient)
-    ]
-
-    Supervisor.start_link(children, strategy: :simple_one_for_one, name: __MODULE__)
+  def process_command(game, command_text) do
+    tokens = Parser.tokenize_line(command_text)
+    parsed_command = Parser.parse(tokens, %{})
+    handle_parsed_command(game, parsed_command)
   end
 
-  def process_command(command_text) do
-    {:ok, command_handler} = Supervisor.start_child(__MODULE__, [])
-    GenServer.call(command_handler, {:handle_command, command_text})
+  def handle_parsed_command(game, %{action: :look}) do
+      player =  Adventure.Game.player(game)
+
+      # find out what room the player is in
+      {:location, location} = Adventure.Component.Location.get(player)
+      room = Map.whereis_name(location)
+
+      IO.puts("\n#{Room.description(room)}\n")
+  end
+
+  def handle_parsed_command(_game, %{action: :destroy, object: :wizard}) do
+      IO.puts("The wizard waves his hand in his sleep and your attack is rebuffed.  The wizard continues to sleep.")
+  end
+
+  def handle_parsed_command(_game, _) do
+      IO.puts("I don't know how to do that")
   end
 end

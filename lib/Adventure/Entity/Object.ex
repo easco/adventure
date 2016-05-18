@@ -26,7 +26,11 @@ defmodule Adventure.Entity.Object do
 
       %{        id: :chain,
               name: "chain",
-        escription: "A long, but light length of chain" }
+        escription: "A long, but light length of chain" },
+
+      %{        id: :wizard,
+              name: "wizard",
+        escription: "The wizard is asleep and cannot be woken" }
     ]
   end
 end
