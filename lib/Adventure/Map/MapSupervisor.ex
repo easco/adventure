@@ -8,6 +8,6 @@ defmodule Adventure.MapSupervisor do
       supervisor(Adventure.Rooms, [], restart: :permanent)
     ]
 
-    Supervisor.start_link(children, strategy: :one_for_one)
+    Supervisor.start_link(children, strategy: :rest_for_one)
   end
 end
