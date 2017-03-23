@@ -1,18 +1,19 @@
 defmodule Adventure.Entity.Room do
   alias Adventure.Component.Title
   alias Adventure.Component.Description
+  alias Adventure.Component.Exits
 
-  def start_link(id, title, description) do
-    Adventure.Entity.start_link(id, [
-      Title.new(title),
-      Description.new(description)
-    ], name: {:via, Adventure.Map, id})
+  defstruct id: :nowhere,
+          title: "In The Ether",
+    description: "You are in a formless gray space.\nThe silence is deafening",
+          exits: []
+
+  def start_link(room_struct) do
+    Adventure.Entity.start_link(room_struct.id, [
+      Title.new(room_struct.title),
+      Description.new(room_struct.description),
+      Exits.new(room_struct.exits)
+    ], name: {:via, Adventure.Map, room_struct.id})
   end
 
-  def description(room) do
-    {:title, title} = Title.get(room)
-    {:description, description} = Description.get(room)
-
-    "#{IO.ANSI.bright()}#{title}#{IO.ANSI.normal()}\n\n#{description}"
-  end
 end

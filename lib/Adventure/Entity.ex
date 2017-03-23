@@ -1,17 +1,16 @@
 defmodule Adventure.Entity do
-
 	def start_link(id, components, opts \\ []) when is_atom(id) do
 		# Start the entity's server
 		{:ok, new_entity} =  GenServer.start_link(__MODULE__, id, opts)
 
 		# Add all the components
-		Enum.each(components, fn(component) -> put_component(new_entity, component) end)
-
-		# add this entity to the list of entities
-		add_to_entities_list(new_entity)
+		Enum.each(components, fn(component) -> update_component(new_entity, elem(component, 0), just_put(elem(component,1))) end)
 
 		{:ok, new_entity}
 	end
+
+	# Returns a component update function that just replaces the component value with a new value
+	defp just_put(new_value), do: fn(_ignore_value) -> new_value end
 
 	def id(entity) do
 	  GenServer.call(entity, :get_id)
@@ -25,12 +24,11 @@ defmodule Adventure.Entity do
 		GenServer.call(entity, {:get_component, component_id})
 	end
 
-	def put_component(entity, {component_id, component_data}) when is_atom(component_id) do
-		GenServer.cast(entity, {:put_component, {component_id, component_data}})
+	def update_component(entity, component_id, update_function) when is_atom(component_id) do
+		GenServer.call(entity, {:update_component, component_id, update_function})
 	end
 
 	# callbacks
-
 	def init(entity_id) do
 		{:ok, {entity_id, %{}} }
 	end
@@ -44,44 +42,17 @@ defmodule Adventure.Entity do
 	end
 
 	def handle_call({:get_component, component_id}, _from, state = {_, components}) do
-		if Map.has_key?(components, component_id)  do
-			{:reply, { component_id, Map.get(components, component_id) }, state }
-		else
-			{:reply, nil, state }
-		end
+		get_reply(component_id, Map.get(components, component_id), state)
 	end
 
-	def handle_cast({:put_component, {component_id, component_data}}, {entity_id, components}) do
-		{:noreply, {entity_id, Map.put(components, component_id, component_data)}}
+	def handle_call({:update_component, component_id, update_function}, _from, {entity_id, components}) do
+			new_component = update_function.(Map.get(components, component_id))
+			{:reply, {component_id, new_component}, {entity_id, Map.put(components, component_id, new_component)}}
 	end
 
-	def handle_cast(_, state) do
-		{:noreply, state}
-	end
+	# if the component couldn't be found in the list, reply nil
+	defp get_reply(_component_id, nil, state), do: {:reply, nil, state}
 
-  # entities list
-
-	def all_entities()  do
-		process_list = entities_process()
-		Agent.get(process_list, &(&1))
-	end
-
-	def entity_with_id(id) do
-		Enum.find(all_entities(), fn(entity) -> id == id(entity) end )
-	end
-
-	defp add_to_entities_list(entity) do
-		process_list = entities_process
-		Agent.update(process_list, fn(entities) -> [entity | entities] end)
-	end
-
-	defp entities_process() do
-		process_list = Process.whereis(__MODULE__)
-
-		if nil == process_list do
-			{:ok, process_list} = Agent.start_link( fn -> [] end, name: __MODULE__ )
-		end
-
-		process_list
-	end
+	# if the component was found in th e list, return a tuple of the id and the component's value
+	defp get_reply(component_id, component_value, state), do: {:reply, {component_id, component_value}, state}
 end

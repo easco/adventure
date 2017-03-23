@@ -1,6 +1,5 @@
 defmodule Adventure.MapSupervisor do
   import Supervisor.Spec
-  alias  Adventure.Entity.Room
 
   def start_link() do
     children = [
