@@ -8,7 +8,7 @@ defmodule Adventure.Component.Location do
 
   def which_room(entity) do
     location_id = id()
-    {^location_id, room_id} =  get(entity)
+    {^location_id, room_id} = get(entity)
     room_id
   end
 end

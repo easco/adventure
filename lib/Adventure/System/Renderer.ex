@@ -11,9 +11,9 @@ defmodule Adventure.System.Renderer do
 
   def render_exits(room) do
     room
-      |> Adventure.Component.Exits.exit_list
-      |> Enum.map(&render_exit/1)
-      |> Enum.join("\n")
+    |> Adventure.Component.Exits.exit_list()
+    |> Enum.map(&render_exit/1)
+    |> Enum.join("\n")
   end
 
   def render_exit({direction, {description, _destination}}) do

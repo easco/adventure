@@ -1,5 +1,4 @@
 defmodule Adventure do
-
   alias Adventure.Game
 
   #
@@ -19,11 +18,11 @@ defmodule Adventure do
   end
 
   defp command_loop(game) do
-    user_input = IO.gets(:stdio, prompt()) |> String.strip
+    user_input = IO.gets(:stdio, prompt()) |> String.strip()
 
     case user_input do
       {:error, _reason} ->
-        throw user_input
+        throw(user_input)
 
       :eof ->
         IO.puts("\n")
@@ -37,8 +36,7 @@ defmodule Adventure do
 
   defp handle_user_command(game, user_input) do
     with {:ok, parsed_action} <- Adventure.Parser.parse_text(user_input),
-      {game, game_output} <- Adventure.Actions.apply_action(game, parsed_action)
-    do
+         {game, game_output} <- Adventure.Actions.apply_action(game, parsed_action) do
       Enum.map(game_output, &IO.puts/1)
       game
     end

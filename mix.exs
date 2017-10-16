@@ -2,11 +2,13 @@ defmodule Adventure.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :adventure,
-     version: "0.0.1",
-     escript: [main_module: Adventure],
-     elixir: "~> 1.0",
-     deps: deps]
+    [
+      app: :adventure,
+      version: "0.0.1",
+      escript: [main_module: Adventure],
+      elixir: "~> 1.0",
+      deps: deps()
+    ]
   end
 
   # Configuration for the OTP application

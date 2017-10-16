@@ -12,26 +12,15 @@ defmodule Adventure.Entity.Object do
 
   def all_objects() do
     [
-      %{        id: :frog,
-              name: "frog",
-       description: "A small green frog" },
-
-      %{        id: :bucket,
-              name: "bucket",
-       description: "A sturdy metal bucket" },
-
-      %{        id: :whiskey_bottle,
-              name: "bottle",
-       description: "A half-empty bottle of quality whiskey" },
-
-      %{        id: :chain,
-              name: "chain",
-        escription: "A long, but light length of chain" },
-
-      %{        id: :wizard,
-              name: "wizard",
-        escription: "The wizard is asleep and cannot be woken" }
+      %{id: :frog, name: "frog", description: "A small green frog"},
+      %{id: :bucket, name: "bucket", description: "A sturdy metal bucket"},
+      %{
+        id: :whiskey_bottle,
+        name: "bottle",
+        description: "A half-empty bottle of quality whiskey"
+      },
+      %{id: :chain, name: "chain", escription: "A long, but light length of chain"},
+      %{id: :wizard, name: "wizard", escription: "The wizard is asleep and cannot be woken"}
     ]
   end
 end
-
