@@ -9,7 +9,7 @@ defmodule Adventure do
 
     {game, first_room} = Adventure.Actions.apply_action(Game.new(), %{action: :look})
     IO.puts(first_room)
- 
+
     command_loop(game)
   end
 
