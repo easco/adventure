@@ -1,4 +1,6 @@
 defmodule Adventure.Parser do
+  alias Adventure.Game
+
   defmodule Result do
     defstruct action: :none, object: nil
   end
@@ -107,7 +109,7 @@ defmodule Adventure.Parser do
   end
 
   # pull in all the known objects and set up classify_word to identify them as nouns
-  for %{id: object_id, name: name} <- Adventure.Entity.Object.all_objects() do
+  for %{id: object_id, name: name} <- Game.all_objects() do
     def classify_word(unquote(name)) do
       {:noun, unquote(object_id)}
     end

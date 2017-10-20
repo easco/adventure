@@ -5,12 +5,12 @@ defmodule Adventure do
   # Escript main routine
   #
   def main(_args) do
-    {:ok, _map} = Adventure.MapSupervisor.start_link()
+    IO.puts(Adventure.Renderer.bold("Welcome to Adventure!"))
 
-    bold_welcome = Adventure.System.Renderer.bold("Welcome to Adventure!")
-    IO.puts("#{bold_welcome}")
-
-    command_loop(%Game{done: false, location: :living_room})
+    {game, first_room} = Adventure.Actions.apply_action(Game.new(), %{action: :look})
+    IO.puts(first_room)
+ 
+    command_loop(game)
   end
 
   defp command_loop(%Game{done: true}) do
@@ -18,7 +18,7 @@ defmodule Adventure do
   end
 
   defp command_loop(game) do
-    user_input = IO.gets(:stdio, prompt()) |> String.strip()
+    user_input = IO.gets(:stdio, prompt()) |> String.trim()
 
     case user_input do
       {:error, _reason} ->
