@@ -1,26 +1,19 @@
 defmodule Adventure.Game do
-  alias Adventure.Object
-  alias Adventure.World
+  alias Adventure.{World, Player, Room}
 
-  defstruct done: false, location: :living_room, world: nil
+  defstruct done: false, location: :living_room, world: World.new(), player: Player.new()
 
-  def new(), do: %__MODULE__{world: World.new()}
+  def new(), do: %__MODULE__{}
 
-  def all_objects() do
-    [
-      %Object{id: :frog, name: "frog", description: "A small green frog"},
-      %Object{id: :bucket, name: "bucket", description: "A sturdy metal bucket"},
-      %Object{
-        id: :whiskey_bottle,
-        name: "bottle",
-        description: "A half-empty bottle of quality whiskey"
-      },
-      %Object{id: :chain, name: "chain", description: "A long, but light length of chain"},
-      %Object{
-        id: :wizard,
-        name: "wizard",
-        description: "The wizard is asleep and cannot be woken"
-      }
-    ]
+  def pick_up_item(game, item) do
+    game
+    |> update_in([Access.key(:world), game.location], &Room.remove_item(&1, item))
+    |> update_in([Access.key(:player)], &Player.pick_up(&1, item))
+  end
+
+  def drop_item(game, item) do
+    game
+    |> update_in([Access.key(:world), game.location], &Room.add_item(&1, item))
+    |> update_in([Access.key(:player)], &Player.drop(&1, item))
   end
 end

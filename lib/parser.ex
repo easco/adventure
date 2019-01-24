@@ -1,8 +1,8 @@
 defmodule Adventure.Parser do
-  alias Adventure.Game
+  alias Adventure.Item
 
   defmodule Result do
-    defstruct action: :none, object: nil
+    defstruct action: :none, subject: nil, object: nil
   end
 
   def parse_text(user_input) do
@@ -35,8 +35,17 @@ defmodule Adventure.Parser do
     parse(rest, Map.put(result, :action, action))
   end
 
-  def parse([{:noun, what} | rest], result) do
+  def parse([{:preposition, _}, {:noun, what} | rest], result) do
     parse(rest, Map.put(result, :object, what))
+  end
+
+  # if we see a noun, and already have a subject, treat the noun like an object
+  def parse([{:noun, what} | rest], %{subject: _} = result) do
+    parse(rest, Map.put(result, :object, what))
+  end
+
+  def parse([{:noun, what} | rest], result) do
+    parse(rest, Map.put(result, :subject, what))
   end
 
   def parse([{:article, _}, {:noun, what} | rest], result) do
@@ -69,7 +78,11 @@ defmodule Adventure.Parser do
     {"kill", :destroy},
     {"go", :go},
     {"look", :look},
-    {"examine", :look}
+    {"examine", :look},
+    {"inventory", :inventory},
+    {"i", :inventory},
+    {"give", :give},
+    {"weld", :weld}
   ]
 
   @articles [
@@ -100,6 +113,10 @@ defmodule Adventure.Parser do
     {"q", :quit}
   ]
 
+  @prepositions [
+    {"to", :to}
+  ]
+
   # pull in all the known verbs and set up classify_word to define them as verbs
   # with the corresponding actions assoicated with them
   for {verb, action} <- @verbs do
@@ -108,8 +125,8 @@ defmodule Adventure.Parser do
     end
   end
 
-  # pull in all the known objects and set up classify_word to identify them as nouns
-  for %{id: object_id, name: name} <- Game.all_objects() do
+  # pull in all the known items and set up classify_word to identify them as nouns
+  for %{id: object_id, name: name} <- Item.all_items() do
     def classify_word(unquote(name)) do
       {:noun, unquote(object_id)}
     end
@@ -129,9 +146,17 @@ defmodule Adventure.Parser do
     end
   end
 
+  # set up classify_word for commands
   for {word, command} <- @commands do
     def classify_word(unquote(word)) do
       {:command, unquote(command)}
+    end
+  end
+
+  # set up classify_word for prepositions
+  for {word, command} <- @prepositions do
+    def classify_word(unquote(word)) do
+      {:preposition, unquote(command)}
     end
   end
 

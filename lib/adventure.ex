@@ -35,7 +35,7 @@ defmodule Adventure do
   end
 
   defp handle_user_command(game, user_input) do
-    with {:ok, parsed_action} <- Adventure.Parser.parse_text(user_input),
+    with {:ok, parsed_action} <- IO.inspect(Adventure.Parser.parse_text(user_input)),
          {game, game_output} <- Adventure.Actions.apply_action(game, parsed_action) do
       Enum.map(game_output, &IO.puts/1)
       game
